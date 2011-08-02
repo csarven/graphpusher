@@ -29,7 +29,7 @@ VOIDFILE="$VOIDDIR/void.ntriples"
 rapper -g $VOIDURL -o ntriples > $VOIDFILE
 
 #XXX: Ideally we should see what the bnode has to say for the dataDump, but, this should suffice. No need to have a bnode there any way.
-DATADUMPURL=`grep -P "[^ ]* <http://rdfs.org/ns/void#dataDump> [^ ]* ." $VOIDFILE | perl -pe 's/([^ ]*) \<http\:\/\/rdfs\.org\/ns\/void\#dataDump\> \<?([^ >]*)\>? \./$2/'`
+DATADUMPURL=`grep -E "[^ ]* <http://rdfs.org/ns/void#dataDump> [^ ]* ." $VOIDFILE | perl -pe 's/([^ ]*) \<http\:\/\/rdfs\.org\/ns\/void\#dataDump\> \<?([^ >]*)\>? \./$2/'`
 
 #TODO: Iterate (wget) through all dataDump URLs here
 
