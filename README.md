@@ -2,6 +2,12 @@
 
 The DIP script takes a VoID URL as input, looks for the dataDump URL, gets the dataDump, and finally imports it into Fuseki's RDF store.
 
+## Requirements
+* bash shell (only tested with this)
+* wget, grep, perl
+* tar, gzip, unzip, 7za, rar
+* [Raptor RDF Syntax Library](http://librdf.org/raptor/), and [rapper](http://librdf.org/raptor/rapper.html) RDF parser utility program
+* [Fuseki](http://openjena.org/wiki/Fuseki) SPARQL server
 
 ## Setup
 Change the BASEDIR, DATASET, PORT values in dip.sh to your own:
