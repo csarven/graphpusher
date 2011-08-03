@@ -55,5 +55,5 @@ esac
 
 for file in $VOIDDIR/*.ttl;
     do
-        /usr/lib/fuseki/./s-post --verbose http://localhost:$PORT/$DATASET/data http://data-gov.ie/graph/$DATADUMPFILESAFE $file;
+        /usr/lib/fuseki/./s-post --verbose http://localhost:$PORT/$DATASET/data $DATADUMPURL $file;
     done;
