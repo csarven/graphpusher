@@ -34,7 +34,7 @@ DATADUMPURL=`grep -E "[^ ]* <http://rdfs.org/ns/void#dataDump> [^ ]* ." $VOIDFIL
 #TODO: Iterate (wget) through all dataDump URLs here
 
 #DATADUMPURLMD5=`echo -n $DATADUMPURL|md5sum|cut -f1 -d" "`
-DATADUMPFILESAFE=`echo -n $DATADUMPURL | perl -pe 's/[^a-zA-Z0-9\._-]/_/g'`
+DATADUMPFILESAFE=`echo -n $DATADUMPURL | perl -pe 's/[^a-zA-Z0-9\.-]/_/g'`
 
 DATADUMPFILE="$VOIDDIR/$DATADUMPFILESAFE"
 
