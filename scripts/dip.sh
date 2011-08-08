@@ -5,11 +5,11 @@
 
 #Config
 #Location to store the dumps
-basedir='/var/www/data-gov.ie/data'
+basedir='/var/www/test'
 #dataset name that is used in Fuseki where we import our data
-dataset='dataset'
+dataset='cso'
 #port number in which we are running the Fuseki server
-port='3131'
+port='3030'
 
 if [ $# -eq 0 -o "$1" = "-h" -o "$1" = "--h" -o "$1" = "-help" -o "$1" = "--help" ]
    then
@@ -24,24 +24,23 @@ voidurlsafe=`echo -n "$voidurl" | perl -pe 's/[^a-zA-Z0-9\._-]/_/g'`
 voiddir="$basedir/$voidurlsafe"
 
 mkdir "$voiddir"
-voidfile="$voiddir/void.ntriples"
+voidfile="$voiddir/void.nt"
 
 rapper -g "$voidurl" -o ntriples > "$voidfile"
 
 #XXX: Ideally we should see what the bnode has to say for the dataDump, but, this should suffice. No need to have a bnode there any way.
-ddu=`grep -E "[^ ]* <http://rdfs.org/ns/void#dataDump> [^ ]* ." $voidfile | perl -pe 's/([^ ]*) \<http\:\/\/rdfs\.org\/ns\/void\#dataDump\> \<?([^ >]*)\>? \./$2/'`
+ddu=`grep -E "[^ ]* <http://rdfs.org/ns/void#dataDump> [^ ]* ." "$voidfile" | perl -pe 's/([^ ]*) \<http\:\/\/rdfs\.org\/ns\/void\#dataDump\> \<?([^ >]*)\>? \./$2/'`
 
 #datadumpurlMD5=`echo -n $datadumpurl|md5sum|cut -f1 -d" "`
 
 for datadumpurl in $( echo -e "$ddu" );
     do
-        echo $datadumpurl
-        datadumpfilesafe=`echo -n "$datadumpurl" | perl -pe 's/[^a-zA-Z0-9\.-]/_/g'`
+#        echo $datadumpurl
+        datadumpfilesafe=`echo -n "$datadumpurl" | perl -pe 's/[^a-zA-Z0-9\._-]/_/g'`
 
         datadumpfile="$voiddir/$datadumpfilesafe"
 
         wget -O - "$datadumpurl" > "$datadumpfile"
-        #wget $datadumpurl --directory-prefix=$TARGETDIR
 
         filetype=`file "$datadumpfile"`
         case "$filetype" in
@@ -49,14 +48,23 @@ for datadumpurl in $( echo -e "$ddu" );
                 ./uncompress.sh "$datadumpfile" "$voiddir"
                 ;;
             *)
-                echo "dataDump is not compressed. We should have our RDF triples already."
+                echo "XXX: dataDump is not compressed. This is okay for now. We'll check later to really make sure it is one of the RDF formats"
                 ;;
         esac
     done
 
-
-for file in "$voiddir"/*.ttl;
+for file in "$voiddir"/*;
     do
-        /usr/lib/fuseki/./s-post --verbose http://localhost:"$port"/"$dataset"/data "$voidurl" "$file";
-    done;
+        filename=$(basename $file);
+        extension=${filename##*.};
+#        echo "$extension";
+        #TODO: Refactor to use only RDF files instead. Probably need to do rapper earlier.
+        if [[ "$filename" != "void.nt" && "$extension" != "gz" && "$extension" != "tar.gz" && "$extension" != "bz2" && "$extension" != "bz" && "$extension" != "tar.bz" && "$extension" != "Z" && "$extension" != "tgz" && "$extension" != "tar.tgz" && "$extension" != "zip" && "$extension" != "rar" && "$extension" != "7z" ]]
+            then
+                #We reserialize because Fuseki needs to know the filetype for HTTP.
+                rapper -g "$file" -o turtle > "$file".ttl
 
+                /usr/lib/fuseki/./s-put --verbose http://localhost:"$port"/"$dataset"/data "$voidurl" "$file".ttl
+                rm "$file".ttl
+        fi
+    done;
