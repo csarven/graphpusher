@@ -43,23 +43,20 @@ end
 
 
 def handleFileType(datadumpfile)
-    fileContents = datadumpfile
+    compressedFile = true
 
     fm = FileMagic.new
     filetype = fm.file(datadumpfile)
 
-    target = datadumpfile + "-x"
+    target = datadumpfile + "-x" + $ds
 
-    puts "Target: " + target
     %x[mkdir #{target}]
 
     case filetype;
         when /gzip compressed.*/
             puts %x[tar zxvf #{datadumpfile} -C #{target} --overwrite]
-            fileContents = %x[tar --list --file=#{datadumpfile}]
         when /POSIX tar.*/
             puts %x[tar xvf #{datadumpfile} -C #{target} --overwrite]
-            fileContents = %x[tar --list --file=#{datadumpfile}]
         when /bzip2 compressed.*/
             puts %x[tar jxvf #{datadumpfile} -C #{target} --overwrite]
         when /Zip archive.*/
@@ -70,12 +67,13 @@ def handleFileType(datadumpfile)
             puts %x[rar -o+ x #{datadumpfile} #{target}]
 
         else
-            puts "XXX: dataDump is not compressed. This is okay for now. We'll check later to really make sure it is one of the RDF formats"
+            puts datadumpfile + " is not a compressed file."
+            compressedFile = false
     end
 
     fm.close
 
-    return fileContents
+    return compressedFile
 end
 
 def getTriples(index, subjects = nil, properties = nil, objects = nil)
@@ -188,7 +186,6 @@ if dataDumps.length > 0
                         end
                     end
                 end
-
             end
         end
     end
@@ -204,25 +201,38 @@ if ddd.length > 0
             datadumpfile.strip!
 
             response = getURL(ddu)
-            puts "Copying " + ddu + " to " + datadumpfile
+
             file = File.new(datadumpfile, "w+")
             file.write(response.body)
             file.close
 
-            fileContents = handleFileType(datadumpfile)
+            compressedFile = handleFileType(datadumpfile)
 
-            target = datadumpfile + "-x"
-            FileUtils.mv(datadumpfile, target)
-            puts "File moved"
+            target = datadumpfile + "-x" + $ds
 
-            graphName = $voidurl
-            puts "Current graphName: " + graphName
-            #For graph names
-            if j.length > 0
-                j.each do |x, y|
-                    graphName = x[0].gsub(/[\<\>]/, '')
-                    puts "New graphName: " + graphName
+            if !compressedFile
+                FileUtils.mv(datadumpfile, target)
+            end
+
+            Dir.foreach(target) do |f|
+
+                next if f == '.' || f == '..'
+
+                graphName = $voidurl
+                if j.length > 0
+                    j.each do |x, y|
+                        graphName = x[0].gsub(/[\<\>]/, '')
+                    end
                 end
+
+                puts %x[rapper -g #{target}#{f} -o turtle > #{target}#{f}.ttl]
+
+                puts %x[/usr/lib/fuseki/./s-put --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{f}.ttl]
+                File.delete(target + f + ".ttl")
+            end
+
+            if compressedFile
+                FileUtils.mv(datadumpfile, target)
             end
         end
     end
