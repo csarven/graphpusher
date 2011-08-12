@@ -143,7 +143,7 @@ def importRDF (target, j)
 
             puts %x[rapper -g #{target}#{f} -o turtle > #{target}#{f}.ttl]
 
-            puts %x[/usr/lib/fuseki/./s-put --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{target}#{f}.ttl]
+            puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{target}#{f}.ttl]
             File.delete(target + f + ".ttl")
         end
     end
