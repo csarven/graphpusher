@@ -144,7 +144,7 @@ end
 puts "Directory " + $voiddir + " already exists." + $nl
 
 $voidfile=$voiddir + $ds + "void.nt"
-puts voidfile
+puts $voidfile
 
 puts "Attempting to get " + $voidurl + " and copy over to " + $voidfile + $nl
 %x[rapper -g #{$voidurl} -o ntriples > #{$voidfile}]
