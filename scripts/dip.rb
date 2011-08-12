@@ -1,17 +1,20 @@
 # SMCS: Sarven's Magical Collection of Scripts for DIP: Data Ingestion Pipeline
-# Usage: dip.rb voidurl e.g., dip.rb http://example.org/void.ttl
-# Make sure that uncompress.sh is in the same directory as this script.
+# https://github.com/data-gov-ie/data-ingestion-pipeline
+
+# Usage: dip.rb voidurl e.g., ruby dip.rb http://example.org/void.ttl
 
 # Config
 # Location to store the dumps
-$basedir='/var/www/data-gov.ie/data'
+$basedir='/var/www/test'
 # Dataset name that is used in Fuseki where we import our data
-$dataset='dataset'
+$dataset='cso'
 # Port number in which we are running the Fuseki server
-$port='3131'
+$port='3030'
 # Operating system
 $os = 'nix'
 
+
+# WARNING: Do not touch below this line unless you speak at 0.91 Timbles or more.
 case $os
     when "nix"
         $ds = "/"
@@ -76,6 +79,7 @@ def handleFileType(datadumpfile)
     return compressedFile
 end
 
+
 def getTriples(index, subjects = nil, properties = nil, objects = nil)
     triples = {}
 
@@ -109,7 +113,6 @@ def getTriples(index, subjects = nil, properties = nil, objects = nil)
                         if (objects.nil? || objects.include?(o_key))
                             o_candidate = o_key;
 
-
                             triples[s_candidate] ||= {}
                             triples[s_candidate][p_candidate] ||= []
                             triples[s_candidate][p_candidate] << o_candidate
@@ -121,6 +124,29 @@ def getTriples(index, subjects = nil, properties = nil, objects = nil)
     end
 
     return triples
+end
+
+
+def importRDF (target, j)
+    Dir.foreach(target) do |f|
+        next if f == '.' || f == '..'
+
+        if File.directory?(target+f)
+            importRDF(target+f+$ds, j)
+        else
+            graphName = $voidurl
+            if j.length > 0
+                j.each do |x, y|
+                    graphName = x[0].gsub(/[\<\>]/, '')
+                end
+            end
+
+            puts %x[rapper -g #{target}#{f} -o turtle > #{target}#{f}.ttl]
+
+            puts %x[/usr/lib/fuseki/./s-put --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{target}#{f}.ttl]
+            File.delete(target + f + ".ttl")
+        end
+    end
 end
 
 
@@ -214,22 +240,7 @@ if ddd.length > 0
                 FileUtils.mv(datadumpfile, target)
             end
 
-            Dir.foreach(target) do |f|
-
-                next if f == '.' || f == '..'
-
-                graphName = $voidurl
-                if j.length > 0
-                    j.each do |x, y|
-                        graphName = x[0].gsub(/[\<\>]/, '')
-                    end
-                end
-
-                puts %x[rapper -g #{target}#{f} -o turtle > #{target}#{f}.ttl]
-
-                puts %x[/usr/lib/fuseki/./s-put --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{f}.ttl]
-                File.delete(target + f + ".ttl")
-            end
+            importRDF(target, j)
 
             if compressedFile
                 FileUtils.mv(datadumpfile, target)
