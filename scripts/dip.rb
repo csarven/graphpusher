@@ -8,6 +8,8 @@
 $basedir='/var/www/test'
 # Dataset name that is used in Fuseki where we import our data
 $dataset='cso'
+# TDB Assembler file
+#$tdbAssembler='/usr/lib/fuseki/tdb2_dataset.ttl'
 # Port number in which we are running the Fuseki server
 $port='3030'
 # Operating system
@@ -131,8 +133,10 @@ def importRDF (target, j)
     Dir.foreach(target) do |f|
         next if f == '.' || f == '..'
 
-        if File.directory?(target+f)
-            importRDF(target+f+$ds, j)
+        file = target+f
+
+        if File.directory?(file)
+            importRDF(file+$ds, j)
         else
             graphName = $voidurl
             if j.length > 0
@@ -141,10 +145,28 @@ def importRDF (target, j)
                 end
             end
 
-            puts %x[rapper -g #{target}#{f} -o turtle > #{target}#{f}.ttl]
-
-            puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{target}#{f}.ttl]
-            File.delete(target + f + ".ttl")
+            case file;
+                when /\.ttl$/, /\.turtle$/,
+                     /\.rdf$/, /\.xml$/, /\.owl$/,
+                     /\.nt$/, /\.ntriples/,
+                     /\.n3/
+                    fileExtension = 'rdf'
+#                    puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}]
+                    puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}]]
+                when /\.tar\.gz$/,
+                     /\.tar$/,
+                     /\.gz$/,
+                     /\.7z$/,
+                     /\.rar$/,
+                     /\.bz2$/
+                    fileExtension = 'compressed'
+                else
+                    fileExtension = ''
+                    puts %x[rapper -g #{file} -o turtle > #{file}.ttl]
+                    puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}.ttl]]
+#                    puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}.ttl]
+                    File.delete(file + ".ttl")
+            end
         end
     end
 end
