@@ -9,7 +9,8 @@ $basedir='/var/www/test'
 # Dataset name that is used in Fuseki where we import our data
 $dataset='cso'
 # TDB Assembler file
-#$tdbAssembler='/usr/lib/fuseki/tdb2_dataset.ttl'
+# Set to 'false' if prefer to use Fuseki's SOH script for SPARQL 1.1 Graph Store HTTP Protocol
+$tdbAssembler='/usr/lib/fuseki/tdb2_dataset.ttl'
 # Port number in which we are running the Fuseki server
 $port='3030'
 # Operating system
@@ -146,25 +147,29 @@ def importRDF (target, j)
             end
 
             case file;
-                when /\.ttl$/, /\.turtle$/,
-                     /\.rdf$/, /\.xml$/, /\.owl$/,
-                     /\.nt$/, /\.ntriples/,
-                     /\.n3/
-                    fileExtension = 'rdf'
-#                    puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}]
-                    puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}]]
                 when /\.tar\.gz$/,
                      /\.tar$/,
                      /\.gz$/,
                      /\.7z$/,
                      /\.rar$/,
                      /\.bz2$/
-                    fileExtension = 'compressed'
+
+                when /\.ttl$/, /\.turtle$/,
+                     /\.rdf$/, /\.xml$/, /\.owl$/,
+                     /\.nt$/, /\.ntriples/,
+                     /\.n3/
+                    if tdbAssembler !== false || !tdbAssembler.empty?
+                        puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}]
+                    else
+                        puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}]
+                    end
                 else
-                    fileExtension = ''
                     puts %x[rapper -g #{file} -o turtle > #{file}.ttl]
-                    puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}.ttl]]
-#                    puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}.ttl]
+                    if tdbAssembler !== false || !tdbAssembler.empty?
+                        puts %x[java tdb.tdbloader --desc #{tdbAssembler} --graph #{graphName} #{file}.ttl]
+                    else
+                        puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}.ttl]
+                    end
                     File.delete(file + ".ttl")
             end
         end
