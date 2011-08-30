@@ -159,14 +159,14 @@ def importRDF (target, j)
                      /\.rdf$/, /\.xml$/, /\.owl$/,
                      /\.nt$/, /\.ntriples/,
                      /\.n3/
-                    if $tdbAssembler != false || !$tdbAssembler.empty?
+                    if $tdbAssembler != false
                         puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}]
                     else
                         puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}]
                     end
                 else
                     puts %x[rapper -g #{file} -o turtle > #{file}.ttl]
-                    if $tdbAssembler != false || !$tdbAssembler.empty?
+                    if $tdbAssembler != false
                         puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}.ttl]
                     else
                         puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}.ttl]
