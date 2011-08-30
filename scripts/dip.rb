@@ -18,7 +18,6 @@ $os = 'nix'
 
 
 # WARNING: Do not touch below this line unless you speak at 0.91 Timbles or more.
-%x[export CLASSPATH=/usr/lib/fuseki/target/fuseki-0.2.1-SNAPSHOT-sys.jar]
 
 case $os
     when "nix"
