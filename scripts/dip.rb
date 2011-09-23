@@ -6,13 +6,30 @@
 # Config
 # Location to store the dumps
 $basedir='/var/www/test'
+
 # Dataset name that is used in Fuseki where we import our data
-$dataset='cso'
+$dataset='dataset'
+
 # TDB Assembler file
 # Set to 'false' if prefer to use Fuseki's SOH script for SPARQL 1.1 Graph Store HTTP Protocol
 $tdbAssembler='/usr/lib/fuseki/tdb2_dataset.ttl'
+#$tdbAssembler = false
+
+# graphName to use in SPARQL Endpoint can be one of (from highest to lowest priority):
+# sd:name
+# dataset
+# dataDump
+# TODO: filename
+
+# By default, if sd:name in VoID is present, it will be used, otherwise, dataset URI will be used. If dataDump or filename is set, they will be used instead of dataset.
+$graphName='dataset'
+
+#TODO: dataDumps are either local or remote (default)
+#$remoteDataDumps = true
+
 # Port number in which we are running the Fuseki server
-$port='3030'
+$port='3535'
+
 # Operating system
 $os = 'nix'
 
@@ -160,18 +177,21 @@ def importRDF (target, j)
                      /\.nt$/, /\.ntriples/,
                      /\.n3/
                     if $tdbAssembler != false
-                        puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}]
+puts "\nRunning task: java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}"
+#                        puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}]
                     else
                         puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}]
                     end
                 else
-                    puts %x[rapper -g #{file} -o turtle > #{file}.ttl]
+puts "\nrapper -g #{file} -o turtle > #{file}.ttl"
+#                    puts %x[rapper -g #{file} -o turtle > #{file}.ttl]
                     if $tdbAssembler != false
-                        puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}.ttl]
+puts "\njava tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}.ttl"
+#                        puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}.ttl]
                     else
                         puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}.ttl]
                     end
-                    File.delete(file + ".ttl")
+#                    File.delete(file + ".ttl")
             end
         end
     end
@@ -223,11 +243,13 @@ dataDumps = getTriples(triples, nil, "<http://rdfs.org/ns/void#dataDump>", nil)
 if dataDumps.length > 0
     dataDumps.each do |a, b|
         datadumpurl = nil
+
         b.each do |x, y|
             datadumpurl = y
             ddd[datadumpurl] ||= {}
         end
 
+#XXX: Revisit. Going from sd:graph to sd:name is probably unnecessary as they both usually have the same object value. 
         sdGraphs = getTriples(triples, nil, "<http://www.w3.org/ns/sparql-service-description#graph>", a)
 
         if sdGraphs.length > 0
@@ -240,6 +262,15 @@ if dataDumps.length > 0
                         end
                     end
                 end
+                #An else can go here to make sure there really is a name
+            end
+        else
+            case $graphName;
+                when 'filename'
+                when 'dataDump'
+                    ddd[datadumpurl][datadumpurl] ||= []
+                else 'dataset'
+                    ddd[datadumpurl][[a]] ||= []
             end
         end
     end
