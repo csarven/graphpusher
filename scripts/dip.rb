@@ -27,8 +27,8 @@ $graphName='dataset'
 #TODO: dataDumps are either local or remote (default)
 #$remoteDataDumps = true
 
-# Port number in which we are running the Fuseki server
-$port='3535'
+# Port number in which we are running the Fuseki server. If tdbAssembler is set, this is not used.
+$port='3333'
 
 # Operating system
 $os = 'nix'
@@ -177,21 +177,21 @@ def importRDF (target, j)
                      /\.nt$/, /\.ntriples/,
                      /\.n3/
                     if $tdbAssembler != false
-puts "\nRunning task: java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}"
-#                        puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}]
+#puts "\nRunning task: java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}"
+                        puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}]
                     else
                         puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}]
                     end
                 else
-puts "\nrapper -g #{file} -o turtle > #{file}.ttl"
-#                    puts %x[rapper -g #{file} -o turtle > #{file}.ttl]
+#puts "\nrapper -g #{file} -o turtle > #{file}.ttl"
+                    puts %x[rapper -g #{file} -o turtle > #{file}.ttl]
                     if $tdbAssembler != false
-puts "\njava tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}.ttl"
-#                        puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}.ttl]
+#puts "\njava tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}.ttl"
+                        puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}.ttl]
                     else
                         puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}.ttl]
                     end
-#                    File.delete(file + ".ttl")
+                    File.delete(file + ".ttl")
             end
         end
     end
