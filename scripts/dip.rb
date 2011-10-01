@@ -7,43 +7,37 @@
 # Location to store the dumps
 $basedir='/var/www/test'
 
-# Dataset name that is used in Fuseki where we import our data
+# Dataset name that is used in Fuseki where we import our data. If you have different TDB assembler files for each dataset, you can leave this as is.
 $dataset='dataset'
 
 # TDB Assembler file
-# Set to 'false' if prefer to use Fuseki's SOH script for SPARQL 1.1 Graph Store HTTP Protocol
-$tdbAssembler='/usr/lib/fuseki/tdb2_dataset.ttl'
+# Set to (bool) false if you prefer to use Fuseki's SOH script for SPARQL 1.1 Graph Store HTTP Protocol, otherwise data will be imported using TDB
+$tdbAssembler='/usr/lib/fuseki/tdb2_dataset.test.ttl'
 #$tdbAssembler = false
 
 # graphName to use in SPARQL Endpoint can be one of (from highest to lowest priority):
 # sd:name
 # dataset
 # dataDump
-# TODO: filename
+# filename
 
-# By default, if sd:name in VoID is present, it will be used, otherwise, dataset URI will be used. If dataDump or filename is set, they will be used instead of dataset.
-$graphName='dataset'
+# By default, if sd:name in VoID is present, it will be used for SPARQL graph name, otherwise, dataset URI will be used. If dataDump or filename is set, they will be used instead of dataset.
+$graphNameCase='dataset'
+
+# Base URL for graph name to be used in SPARQL Endpoint. When $graphNameCase='filename', this is used.
+$graphNameBase='http://example.org/graph/'
 
 #TODO: dataDumps are either local or remote (default)
 #$remoteDataDumps = true
 
 # Port number in which we are running the Fuseki server. If tdbAssembler is set, this is not used.
-$port='3333'
+$port='3939'
 
 # Operating system
-$os = 'nix'
+$os = 'linux'
 
 
 # WARNING: Do not touch below this line unless you speak at 0.91 Timbles or more.
-
-case $os
-    when "nix"
-        $ds = "/"
-        $nl = "\n"
-    else
-        $ds = "\\"
-        $nl = "\r\n"
-end
 
 require 'rubygems'
 require "net/http"
@@ -52,6 +46,17 @@ require 'uri'
 require 'fileutils'
 require 'filemagic'
 
+# Sets new line character based on Operatin System
+case $os
+    when "linux"
+        $ds = "/"
+        $nl = "\n"
+    else
+        $ds = "\\"
+        $nl = "\r\n"
+end
+
+# HTTP GET on a URI
 def getURL(uri_str, limit = 10)
     # You should choose better exception.
     raise ArgumentError, 'HTTP redirect too deep' if limit == 0
@@ -66,6 +71,7 @@ def getURL(uri_str, limit = 10)
 end
 
 
+# Checks if a file is a compressed archive (returns true) or something else (returns false). Creates a directory based on file name.
 def handleFileType(datadumpfile)
     compressedFile = true
 
@@ -74,8 +80,10 @@ def handleFileType(datadumpfile)
 
     target = datadumpfile + "-x" + $ds
 
+    puts "\nXXX: Making directory: " + target
     %x[mkdir #{target}]
 
+    puts "\nXXX: Checking if " + datadumpfile + " is a compressed file, and decompress:"
     case filetype;
         when /gzip compressed.*/
             puts %x[tar zxvf #{datadumpfile} -C #{target} --overwrite]
@@ -91,7 +99,7 @@ def handleFileType(datadumpfile)
             puts %x[rar -o+ x #{datadumpfile} #{target}]
 
         else
-            puts datadumpfile + " is not a compressed file."
+            puts "\nXXX: " + datadumpfile + " is not a compressed file."
             compressedFile = false
     end
 
@@ -101,6 +109,7 @@ def handleFileType(datadumpfile)
 end
 
 
+# Returns an array of triples that match a certain SPO pattern on a given index of triples (array). Wildcards are allowed.
 def getTriples(index, subjects = nil, properties = nil, objects = nil)
     triples = {}
 
@@ -148,6 +157,7 @@ def getTriples(index, subjects = nil, properties = nil, objects = nil)
 end
 
 
+# Imports RDF files in a directory
 def importRDF (target, j)
     Dir.foreach(target) do |f|
         next if f == '.' || f == '..'
@@ -157,11 +167,17 @@ def importRDF (target, j)
         if File.directory?(file)
             importRDF(file+$ds, j)
         else
+            puts "\nXXX: About to import " + f + ":"
+
             graphName = $voidurl
             if j.length > 0
                 j.each do |x, y|
                     graphName = x[0].gsub(/[\<\>]/, '')
                 end
+            end
+
+            if graphName == '___filename___'
+                graphName = $graphNameBase + file.gsub(/.*\/(.*)/, '\1')
             end
 
             case file;
@@ -177,16 +193,13 @@ def importRDF (target, j)
                      /\.nt$/, /\.ntriples/,
                      /\.n3/
                     if $tdbAssembler != false
-#puts "\nRunning task: java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}"
                         puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}]
                     else
                         puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}]
                     end
                 else
-#puts "\nrapper -g #{file} -o turtle > #{file}.ttl"
                     puts %x[rapper -g #{file} -o turtle > #{file}.ttl]
                     if $tdbAssembler != false
-#puts "\njava tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}.ttl"
                         puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}.ttl]
                     else
                         puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}.ttl]
@@ -211,17 +224,17 @@ $voiddir=$basedir + $ds + $voidurlsafe
 
 if !FileTest::directory?($voiddir)
     Dir::mkdir($voiddir)
-    puts "Made directory: " + $voiddir + $nl
+    puts "XXX: Made directory: " + $voiddir + $nl
 end
-puts "Directory " + $voiddir + " already exists." + $nl
+puts "XXX: Directory " + $voiddir + " already exists." + $nl
 
 $voidfile=$voiddir + $ds + "void.nt"
 puts $voidfile
 
-puts "Attempting to get " + $voidurl + " and copy over to " + $voidfile + $nl
+puts "XXX: Attempting to get " + $voidurl + " and copy over to " + $voidfile + $nl
 %x[rapper -g #{$voidurl} -o ntriples > #{$voidfile}]
 
-puts "Analyzing " + $voidfile + $nl
+puts "XXX: Analyzing " + $voidfile + $nl
 
 ddd = {}
 triples = {}
@@ -249,7 +262,6 @@ if dataDumps.length > 0
             ddd[datadumpurl] ||= {}
         end
 
-#XXX: Revisit. Going from sd:graph to sd:name is probably unnecessary as they both usually have the same object value. 
         sdGraphs = getTriples(triples, nil, "<http://www.w3.org/ns/sparql-service-description#graph>", a)
 
         if sdGraphs.length > 0
@@ -265,8 +277,10 @@ if dataDumps.length > 0
                 #An else can go here to make sure there really is a name
             end
         else
-            case $graphName;
+            puts "\nXXX: No sd:graph found. Falling back to #{$graphNameCase} URL for graph names."
+            case $graphNameCase;
                 when 'filename'
+                    ddd[datadumpurl][['___filename___']] ||= []
                 when 'dataDump'
                     ddd[datadumpurl][datadumpurl] ||= []
                 else 'dataset'
@@ -276,14 +290,23 @@ if dataDumps.length > 0
     end
 end
 
+# ddd[datadumpurl][graphurl]
+puts "\nXXX: datadumps to be imported (datadumpurl => graphurl):\n"
+p ddd
+
 if ddd.length > 0
     ddd.each do |i, j|
         i.each do |ddu, b|
             ddu.gsub!(/[\<\>]/, '')
-            datadumpfilesafe = ddu.gsub(/[^a-zA-Z0-9\._-]/, '_')
+            datadumpdirectorysafe = ddu.gsub(/[^a-zA-Z0-9\._-]/, '_')
 
-            datadumpfile = $voiddir + $ds + datadumpfilesafe
-            datadumpfile.strip!
+            datadumpdirectory = $voiddir + $ds + datadumpdirectorysafe + "-x" + $ds
+#            datadumpdirectory.strip!
+
+            datadumpfilesafe = ddu.gsub(/.*\/(.*)/, '\1')
+            datadumpfile = $voiddir + $ds + datadumpdirectorysafe
+
+            target = datadumpdirectory + datadumpfilesafe
 
             response = getURL(ddu)
 
@@ -293,14 +316,14 @@ if ddd.length > 0
 
             compressedFile = handleFileType(datadumpfile)
 
-            target = datadumpfile + "-x" + $ds
-
+            # If the datadumpfile is not compressed, move it into the datadump directory. Otherwise, the contents of the compressed file is already there
             if !compressedFile
                 FileUtils.mv(datadumpfile, target)
             end
 
-            importRDF(target, j)
+            importRDF(datadumpdirectory, j)
 
+            # If the datadumpfile was compressed, move it into its own directory once everthing is done
             if compressedFile
                 FileUtils.mv(datadumpfile, target)
             end
