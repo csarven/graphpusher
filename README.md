@@ -1,55 +1,51 @@
 # data-ingestion-pipeline
 
-The DIP script takes a VoID URL as input, looks for the dataDump URL, gets the dataDump, and finally imports it into Fuseki's RDF store.
+## Overview
+
+Data Ingestion Pipeline (DIP) is a tool to rebuild an RDF store based on the information in a VoID file.
+
+The DIP script takes a VoID URL as input from command-line, looks for the dataDump URL, gets the dataDump, and finally imports it into Fuseki's RDF store using one of the graph name methods.
+
+This script is tested and is functional under Debian/Ubuntu. Feedback is appreciated from other OS users.
+
 
 ## Requirements
-* bash shell (only tested with this)
-* wget, grep, perl
+* [Ruby](http://ruby-lang.org/) (required gems: rubygems, net/http, net/https, uri, fileutils, filemagic)
 * tar, gzip, unzip, 7za, rar
 * [Raptor RDF Syntax Library](http://librdf.org/raptor/), and [rapper](http://librdf.org/raptor/rapper.html) RDF parser utility program
 * [Fuseki](http://openjena.org/wiki/Fuseki) SPARQL server
+* [TDB](http://openjena.org/wiki/TDB) RDF store (optional: where tdbAssembler setting is used)
 
-## Setup
-Change the BASEDIR, DATASET, PORT values in dip.sh to your own:
+
+## Configuration
+* basedir : Location to store the dumps
+* dataset : Dataset name for the store
+* tdbAssembler : TDB assembler file
+* graphNameCase : Graph name method for SPARQL
+* graphNameBase : Base URL for graph names
+* port : Port number for Fuseki
+* os : Operating System name to determine new line types
 
 
 ## Usage
-### Importing dataDumps into RDF store via VoID
-    dip.sh http://example.org/void.ttl
+Importing dataDumps into RDF store via VoID file:
+
+    Usage: dip.rb voidurl
+    Example: dip.rb http://example.org/void.ttl
 
 
 ## SPARQL Graph names
-Currently considering ways to name graphs in SPARQL Updates for the data in dataDumps.
+A graph name for the SPARQL Endpoint uses one of the following (from highest to lowest priority) by setting the graphNameCase:
 
-Let's look at some cases:
+* sd:name (default)
+* dataset
+* dataDump
+* filename
 
-1. Single RDF file (http://example.org/datadump.ttl)
-2. Multiple RDF files (http://example.org/datadump.zip)
-    * 2.1. RDF files in root directory only (http://example.org/datadump.zip contains)
-        * /d0.ttl
-        * /d1.ttl
-    * 2.2. RDF files in root and/or sub-directories (http://example.org/datadump.zip contains)
-        * /d0.ttl
-        * /d1.ttl
-        * /0/d0.ttl
-        * /0/d1.ttl
-        * /0/d2.ttl
-        * /1/d0.ttl
-        * /2/d1.ttl
+By default, if sd:name in VoID is present, it will be used for SPARQL graph name, otherwise, dataset URI will be used. If dataDump or filename is set, they will be used instead of dataset.
 
-The simplest approach is to use the datadump URL as the graph name. Anything else would be custom and subject to arbitrary rules for building a graph name.
+When filename is set for the graph name case, the base URL value (graphNameBase) for graph name is used in the SPARQL Endpoint.
 
-For instance, in case 2.2, we have a scenario with multiple directories with multiple files. Some possibilities are:
 
-1. each file name as its own graph name
-2. each directory name as the graph name
-3. each directory name and the file name as the graph name
-
-If we don't preserve the original dataDump URL in any form, we are subject to run into a situation where graph names get overridden as different dataDump files may have the same path and file structure.
-
-Hence, it is probably a good idea to retain the datadump URL in the graph name. It will also help knowing where the data was retrieved from. Otherwise, we need to have the following triples in each graph to make that explicit e.g.,
-
-    <http://example.org/datadump.zip/0/d1.ttl> a void:dataSet ;
-        void:dataDump <http://example.org/datadump.zip> .
-
-Therefore, the simplest conclusion here is to use the dataDump URL as the graph name. What are some of the issues with this approach?
+## ToDo
+Ability to use datadump files from the local network drive.
