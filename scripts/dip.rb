@@ -46,7 +46,7 @@ require 'uri'
 require 'fileutils'
 require 'filemagic'
 
-# Sets new line character based on Operatin System
+# Sets new line character based on Operating System
 case $os
     when "linux"
         $ds = "/"
@@ -213,7 +213,7 @@ end
 
 if ARGV.length == 0 || ARGV.length > 1 || ARGV[0] == "-h" || ARGV[0] == "--h" || ARGV[0] == "-help" || ARGV[0] == "--help"
     puts "Usage: dip.rb voidurl"
-    puts "       example: dip.rb http://example.org/void.ttl"
+    puts "       Example: dip.rb http://example.org/void.ttl"
     exit
 end
 
