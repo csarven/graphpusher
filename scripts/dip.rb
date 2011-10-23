@@ -33,19 +33,7 @@ puts "XXX: Attempting to get " + $voidurl + " and copy over to " + $voidfile + $
 puts "XXX: Analyzing " + $voidfile + $nl
 
 ddd = {}
-triples = {}
-
-file = File.new($voidfile, "r")
-while (line = file.gets)
-    l = Array.new(line.split(/([^ ]*) ([^ ]*) ([^\>]*[\>]?) (\.)(.*)/))
-    s = l[1]
-    p = l[2]
-    o = l[3]
-
-    triples[s] ||= {} # Create a sub-hash unless it already exists
-    triples[s][p] ||= []
-    triples[s][p] << o
-end
+triples = indexTriples($voidfile)
 
 dataDumps = getTriples(triples, nil, "<http://rdfs.org/ns/void#dataDump>", nil)
 

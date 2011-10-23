@@ -59,6 +59,26 @@ def handleFileType(datadumpfile)
 end
 
 
+# Returns an array of triples from an n-triples file format.
+def indexTriples(f)
+    triples = {}
+
+    file = File.new(f, "r")
+    while (line = file.gets)
+        l = Array.new(line.split(/([^ ]*) ([^ ]*) ([^\>]*[\>]?) (\.)(.*)/))
+        s = l[1]
+        p = l[2]
+        o = l[3]
+
+        triples[s] ||= {} # Create a sub-hash unless it already exists
+        triples[s][p] ||= []
+        triples[s][p] << o
+    end
+
+    return triples
+end
+
+
 # Returns an array of triples that match a certain SPO pattern on a given index of triples (array). Wildcards are allowed.
 def getTriples(index, subjects = nil, properties = nil, objects = nil)
     triples = {}
