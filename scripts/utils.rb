@@ -1,4 +1,10 @@
 require 'config.rb'
+require 'rubygems'
+require "net/http"
+require "net/https"
+require 'uri'
+require 'fileutils'
+require 'filemagic'
 
 # HTTP GET on a URI
 def getURL(uri_str, limit = 10)

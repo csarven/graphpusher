@@ -5,18 +5,8 @@
 
 # Use config.rb for configuration settings.
 
-# WARNING: Do not touch below this line unless you speak at 0.91 Timbles or more.
-
-require 'config.rb'
 require 'utils.rb'
-require 'rubygems'
-require "net/http"
-require "net/https"
-require 'uri'
-require 'fileutils'
-require 'filemagic'
 
-require 'config.rb'
 if ARGV.length == 0 || ARGV.length > 1 || ARGV[0] == "-h" || ARGV[0] == "--h" || ARGV[0] == "-help" || ARGV[0] == "--help"
     puts "Usage: dip.rb voidurl"
     puts "       Example: dip.rb http://example.org/void.ttl"
