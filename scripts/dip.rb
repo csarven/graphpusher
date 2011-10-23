@@ -15,16 +15,6 @@ require 'uri'
 require 'fileutils'
 require 'filemagic'
 
-# Sets new line character based on Operating System
-case $os
-    when "linux"
-        $ds = "/"
-        $nl = "\n"
-    else
-        $ds = "\\"
-        $nl = "\r\n"
-end
-
 # HTTP GET on a URI
 def getURL(uri_str, limit = 10)
     # You should choose better exception.

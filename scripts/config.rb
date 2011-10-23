@@ -6,7 +6,8 @@ $basedir='/var/www/test'
 $dataset='dataset'
 
 # TDB Assembler file
-# Set to (bool) false if you prefer to use Fuseki's SOH script for SPARQL 1.1 Graph Store HTTP Protocol, otherwise data will be imported using TDB
+# Set to (bool) false if you prefer to use Fuseki's SOH script for SPARQL 1.1 Graph Store HTTP Protocol, otherwise data will be imported using TDB.
+# Make sure to use full paths in your assembler file.
 $tdbAssembler='/usr/lib/fuseki/tdb2_dataset.test.ttl'
 #$tdbAssembler = false
 
@@ -31,3 +32,12 @@ $port='3939'
 # Operating system
 $os = 'linux'
 
+# Sets new line character based on Operating System
+case $os
+    when "linux"
+        $ds = "/"
+        $nl = "\n"
+    else
+        $ds = "\\"
+        $nl = "\r\n"
+end
