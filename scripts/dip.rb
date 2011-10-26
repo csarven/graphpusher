@@ -7,13 +7,15 @@
 
 require 'utils.rb'
 
-if ARGV.length == 0 || ARGV.length > 1 || ARGV[0] == "-h" || ARGV[0] == "--h" || ARGV[0] == "-help" || ARGV[0] == "--help"
-    puts "Usage: dip.rb voidurl"
-    puts "       Example: dip.rb http://example.org/void.ttl"
+if ARGV.length != 2 || ARGV[0] == "-h" || ARGV[0] == "--h" || ARGV[0] == "-help" || ARGV[0] == "--help"
+    puts "Usage: dip.rb voidurl /path/to/tdbAssemblerSlave"
+    puts "       Example: dip.rb http://example.org/void.ttl /usr/lib/fuseki/tdb2_slave.ttl"
     exit
 end
 
 $voidurl = ARGV[0]
+$tdbAssemblerSlave = ARGV[1]
+
 $voidurlsafe = $voidurl.gsub(/[^a-zA-Z0-9\._-]/, '_')
 
 $voiddir=$basedir + $ds + $voidurlsafe
@@ -28,6 +30,7 @@ $voidfile=$voiddir + $ds + "void.nt"
 puts $voidfile
 
 puts "XXX: Attempting to get " + $voidurl + " and copy over to " + $voidfile + $nl
+#XXX: Try to refactor this with indexTriples
 %x[rapper -g #{$voidurl} -o ntriples > #{$voidfile}]
 
 puts "XXX: Analyzing " + $voidfile + $nl

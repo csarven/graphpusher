@@ -59,13 +59,14 @@ def handleFileType(datadumpfile)
 end
 
 
-# Returns an array of triples from an n-triples file format.
+# Returns an N-triples serialization of triples from an RDF file as an array or string
 def indexTriples(f)
     triples = {}
 
-    file = File.new(f, "r")
-    while (line = file.gets)
-        l = Array.new(line.split(/([^ ]*) ([^ ]*) ([^\>]*[\>]?) (\.)(.*)/))
+    f = %x[rapper -gq #{f} -o ntriples]
+
+    f.each do |line|
+        l = Array.new(line.chomp.split(/([^ ]*) ([^ ]*) ([^\>]*[\>]?) (\.)(.*)/))
         s = l[1]
         p = l[2]
         o = l[3]
@@ -127,6 +128,45 @@ def getTriples(index, subjects = nil, properties = nil, objects = nil)
 end
 
 
+def getObject(triples)
+    triples.each do |s, po|
+        po.each do |p, o|
+            return o[0]
+        end
+    end
+end
+
+
+def getSubject(triples)
+    triples.each do |s, po|
+        return s
+    end
+end
+
+
+def getURIFragment(uri)
+    return uri.split(/.*\#(.*)/)[1]
+end
+
+
+def getTDBAssemblerDatasetName(tdbAssembler)
+    triples = indexTriples(tdbAssembler)
+    datasetLocation = getTriples(triples, nil, "<http://jena.hpl.hp.com/2008/tdb#location>", nil)
+    subject = getSubject(datasetLocation)
+
+    return getURIFragment(subject.split(/<(.*)>/)[1])
+end
+
+
+def getTDBAssemblerDatasetLocation(tdbAssembler)
+    triples = indexTriples(tdbAssembler)
+    datasetLocation = getTriples(triples, nil, "<http://jena.hpl.hp.com/2008/tdb#location>", nil)
+    object = getObject(datasetLocation)
+
+    return object.split(/\"(.*)\"/)[1]
+end
+
+
 # Imports RDF files in a directory
 def importRDF (target, j)
     Dir.foreach(target) do |f|
@@ -162,20 +202,33 @@ def importRDF (target, j)
                      /\.rdf$/, /\.xml$/, /\.owl$/,
                      /\.nt$/, /\.ntriples/,
                      /\.n3/
-                    if $tdbAssembler != false
-                        puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}]
+                    if $tdbAssemblerSlave != false
+                        puts %x[java tdb.tdbloader --desc #{$tdbAssemblerSlave} --graph #{graphName} #{file}]
                     else
-                        puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}]
+                        puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$datasetSlave}/data #{graphName} #{file}]
                     end
                 else
                     puts %x[rapper -g #{file} -o turtle > #{file}.ttl]
-                    if $tdbAssembler != false
-                        puts %x[java tdb.tdbloader --desc #{$tdbAssembler} --graph #{graphName} #{file}.ttl]
+                    if $tdbAssemblerSlave != false
+                        puts %x[java tdb.tdbloader --desc #{$tdbAssemblerSlave} --graph #{graphName} #{file}.ttl]
                     else
-                        puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$dataset}/data #{graphName} #{file}.ttl]
+                        puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$datasetSlave}/data #{graphName} #{file}.ttl]
                     end
                     File.delete(file + ".ttl")
             end
         end
     end
+end
+
+
+#tdbAssemblerMaster
+if !$tdbAssemblerMaster.nil?
+    $datasetMaster = getTDBAssemblerDatasetName($tdbAssemblerMaster)
+    $datasetMasterLocation = getTDBAssemblerDatasetLocation($tdbAssemblerMaster)
+end
+
+#tdbAssemblerSlave
+if !$tdbAssemblerSlave.nil?
+    $datasetSlave = getTDBAssemblerDatasetName($tdbAssemblerSlave)
+    $datasetSlaveLocation = getTDBAssemblerDatasetLocation($tdbAssemblerSlave)
 end
