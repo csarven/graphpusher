@@ -1,15 +1,15 @@
-# SMCS: Sarven's Magical Collection of Scripts for DIP: Data Ingestion Pipeline
-# https://github.com/data-gov-ie/data-ingestion-pipeline
+# SMCS: Sarven's Magical Collection of Scripts for ReVoID
+# https://github.com/data-gov-ie/revoid
 
-# Usage: dip.rb voidurl e.g., ruby dip.rb http://example.org/void.ttl
+# Usage: revoid.rb voidurl e.g., ruby revoid.rb http://example.org/void.ttl
 
 # Use config.rb for configuration settings.
 
 require 'utils.rb'
 
 if ARGV.length != 2 || ARGV[0] == "-h" || ARGV[0] == "--h" || ARGV[0] == "-help" || ARGV[0] == "--help"
-    puts "Usage: dip.rb voidurl /path/to/tdbAssemblerSlave"
-    puts "       Example: dip.rb http://example.org/void.ttl /usr/lib/fuseki/tdb2_slave.ttl"
+    puts "Usage: revoid.rb voidurl /path/to/tdbAssemblerSlave"
+    puts "       Example: revoid.rb http://example.org/void.ttl /usr/lib/fuseki/tdb2_slave.ttl"
     exit
 end
 

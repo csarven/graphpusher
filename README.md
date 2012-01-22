@@ -1,10 +1,10 @@
-# data-ingestion-pipeline
+# ReVoID
 
 ## Overview
 
-Data Ingestion Pipeline (DIP) is a tool to rebuild an RDF store based on the information in a VoID file.
+ReVoID is a tool to rebuild an RDF store based on the information in a VoID file.
 
-The DIP script takes a VoID URL as input from command-line, looks for the dataDump URL, gets the dataDump, and finally imports it into Fuseki's RDF store using one of the graph name methods.
+The ReVoID script takes a VoID URL as input from command-line, looks for the dataDump URL, gets the dataDump, and finally imports it into Fuseki's RDF store using one of the graph name methods.
 
 This script is tested and is functional under Debian/Ubuntu. Feedback is appreciated from other OS users.
 
@@ -30,8 +30,8 @@ This script is tested and is functional under Debian/Ubuntu. Feedback is appreci
 ## Usage
 Importing dataDumps into RDF store via VoID file:
 
-    Usage: dip.rb voidurl
-    Example: dip.rb http://example.org/void.ttl
+    Usage: revoid.rb voidurl
+    Example: revoid.rb http://example.org/void.ttl
 
 
 ## SPARQL Graph names

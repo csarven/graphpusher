@@ -18,7 +18,7 @@ $graphNameBase='http://example.org/graph/'
 #$remoteDataDumps = true
 
 # Port number in which we are running the Fuseki server. If tdbAssembler is set, this is not used.
-$port='3939'
+$port='3030'
 
 # Operating system
 $os = 'linux'
