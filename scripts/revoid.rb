@@ -1,15 +1,29 @@
-# SMCS: Sarven's Magical Collection of Scripts for ReVoID
+# ReVoID - Rebuild an RDF store from VoID
 # https://github.com/data-gov-ie/revoid
-
-# Usage: revoid.rb voidurl e.g., ruby revoid.rb http://example.org/void.ttl
-
-# Use config.rb for configuration settings.
 
 require 'utils.rb'
 
 if ARGV.length != 2 || ARGV[0] == "-h" || ARGV[0] == "--h" || ARGV[0] == "-help" || ARGV[0] == "--help"
-    puts "Usage: revoid.rb voidurl /path/to/tdbAssemblerSlave"
-    puts "       Example: revoid.rb http://example.org/void.ttl /usr/lib/fuseki/tdb2_slave.ttl"
+    puts "ReVoID - Rebuild an RDF store from VoID"
+    puts "    Homepage: https://github.com/data-gov-ie/revoid"
+    puts "    Author:   http://csarven.ca/#i"
+    puts "    License:  http://www.apache.org/licenses/LICENSE-2.0"
+    puts ""
+    puts "    ARGUMENTS"
+    puts "        [VOIDURL] [OPTIONS]"
+    puts ""
+    puts "    VOIDURL"
+    puts "        A well-formed VoID file"
+    puts ""
+    puts "    OPTIONS"
+    puts "        tdbassembler         Path to tdb assembler file"
+    puts ""
+    puts "    EXAMPLE"
+    puts "        ruby revoid.rb http://example.org/void.ttl /usr/lib/fuseki/tdb2_slave.ttl"
+    puts ""
+    puts "    NOTES"
+    puts "        See also config.rd for configuration settings"
+
     exit
 end
 
