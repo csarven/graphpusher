@@ -21,7 +21,7 @@ See also: http://csarven.ca/graphpusher
 * basedir : Location to store the dumps
 * dataset : Dataset name for the store
 * tdbAssembler : TDB assembler file
-* graphNameCase : Graph name method for SPARQL
+* graphNameMethod : Graph name method for SPARQL
 * graphNameBase : Base URL for graph names
 * port : Port number for Fuseki
 * os : Operating System name to determine new line types
@@ -35,7 +35,7 @@ Importing dataDumps into RDF store via VoID file:
 
 
 ## SPARQL Graph names
-A graph name for the SPARQL Endpoint uses one of the following (from highest to lowest priority) by setting the graphNameCase:
+A graph name for the SPARQL Endpoint uses one of the following (from highest to lowest priority) by setting the graphNameMethod:
 
 * dataset (default)
 * dataDump

@@ -90,8 +90,8 @@ if dataDumps.length > 0
                 #An else can go here to make sure there really is a name
             end
         else
-            puts "\nNo sd:graph found. Falling back to #{$graphNameCase} URL for graph names."
-            case $graphNameCase;
+            puts "\nNo sd:graph found. Falling back to #{$graphNameMethod} URL for graph names."
+            case $graphNameMethod;
                 when 'filename'
                     ddd[datadumpurl][['___filename___']] ||= []
                 when 'dataDump'

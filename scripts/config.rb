@@ -10,9 +10,9 @@ $basedir='/var/www/test'
 # filename
 
 # By default, if sd:name in VoID is present, it will be used for SPARQL graph name, otherwise, dataset URI will be used. If dataDump or filename is set, they will be used instead of dataset.
-$graphNameCase='dataset'
+$graphNameMethod='dataset'
 
-# Base URL for graph name to be used in SPARQL Endpoint. When $graphNameCase='filename', this is used.
+# Base URL for graph name to be used in SPARQL Endpoint. When $graphNameMethod='filename', this is used.
 $graphNameBase='http://example.org/graph/'
 
 #TODO: dataDumps are either local or remote (default)
