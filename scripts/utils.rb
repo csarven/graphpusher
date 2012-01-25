@@ -1,3 +1,6 @@
+# GraphPusher https://github.com/csarven/GraphPusher
+#    Helper utils for GraphPusher
+
 require 'config.rb'
 require 'rubygems'
 require "net/http"
@@ -30,10 +33,10 @@ def handleFileType(datadumpfile)
 
     target = datadumpfile + "-x" + $ds
 
-    puts "\nXXX: Making directory: " + target
+    puts "Making directory: " + target
     %x[mkdir #{target}]
 
-    puts "\nXXX: Checking if " + datadumpfile + " is a compressed file, and decompress:"
+    puts "Checking if " + datadumpfile + " is a compressed file, and decompress:"
     case filetype;
         when /gzip compressed.*/
             puts %x[tar zxvf #{datadumpfile} -C #{target} --overwrite]
@@ -49,7 +52,7 @@ def handleFileType(datadumpfile)
             puts %x[rar -o+ x #{datadumpfile} #{target}]
 
         else
-            puts "\nXXX: " + datadumpfile + " is not a compressed file."
+            puts datadumpfile + " is not a compressed file."
             compressedFile = false
     end
 
@@ -175,9 +178,9 @@ def importRDF (target, j)
         file = target+f
 
         if File.directory?(file)
-            importRDF(file+$ds, j)
+            importRDF(file + $ds, j)
         else
-            puts "\nXXX: About to import " + f + ":"
+            puts "Importing " + f + ":"
 
             graphName = $voidurl
             if j.length > 0
@@ -202,17 +205,19 @@ def importRDF (target, j)
                      /\.rdf$/, /\.xml$/, /\.owl$/,
                      /\.nt$/, /\.ntriples/,
                      /\.n3/
-                    if $tdbAssemblerSlave != false
+                    if !$tdbAssemblerSlave.nil?
                         puts %x[java tdb.tdbloader --desc #{$tdbAssemblerSlave} --graph #{graphName} #{file}]
                     else
-                        puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$datasetSlave}/data #{graphName} #{file}]
+                        puts %x[./soh post --verbose #{$datasetURI} #{graphName} #{file}]
+#                        puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$datasetSlave}/data #{graphName} #{file}]
                     end
                 else
                     puts %x[rapper -g #{file} -o turtle > #{file}.ttl]
-                    if $tdbAssemblerSlave != false
+                    if !$tdbAssemblerSlave.nil?
                         puts %x[java tdb.tdbloader --desc #{$tdbAssemblerSlave} --graph #{graphName} #{file}.ttl]
                     else
-                        puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$datasetSlave}/data #{graphName} #{file}.ttl]
+                        puts %x[./soh post --verbose #{$datasetURI} #{graphName} #{file}]
+#                        puts %x[/usr/lib/fuseki/./s-post --verbose http://localhost:#{$port}/#{$datasetSlave}/data #{graphName} #{file}.ttl]
                     end
                     File.delete(file + ".ttl")
             end

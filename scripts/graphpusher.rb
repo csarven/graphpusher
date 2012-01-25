@@ -1,34 +1,46 @@
-# ReVoID - Rebuild an RDF store from VoID
-# https://github.com/data-gov-ie/revoid
+# GraphPusher https://github.com/csarven/GraphPusher
+#    Retrieves and imports data in RDF format into a graph store
+#    based on the metadata in a VoID file
 
 require 'utils.rb'
 
-if ARGV.length != 2 || ARGV[0] == "-h" || ARGV[0] == "--h" || ARGV[0] == "-help" || ARGV[0] == "--help"
-    puts "ReVoID - Rebuild an RDF store from VoID"
-    puts "    Homepage: https://github.com/data-gov-ie/revoid"
+if ARGV.length == 0 || ARGV[0] == "-h" || ARGV[0] == "--h" || ARGV[0] == "-help" || ARGV[0] == "--help"
+    puts "GraphPusher - Rebuild an RDF store from VoID"
+    puts "    Homepage: https://github.com/csarven/GraphPusher"
     puts "    Author:   http://csarven.ca/#i"
     puts "    License:  http://www.apache.org/licenses/LICENSE-2.0"
     puts ""
     puts "    ARGUMENTS"
-    puts "        [VOIDURL] [OPTIONS]"
+    puts "        VOIDURL [OPTIONS]"
     puts ""
     puts "    VOIDURL"
     puts "        A well-formed VoID file"
     puts ""
     puts "    OPTIONS"
-    puts "        tdbassembler         Path to tdb assembler file"
+    puts "        --assembler {tdbAssembler}"
+    puts "        --dataset {datasetURI}"
     puts ""
-    puts "    EXAMPLE"
-    puts "        ruby revoid.rb http://example.org/void.ttl /usr/lib/fuseki/tdb2_slave.ttl"
+    puts "    EXAMPLES"
+    puts "        ruby GraphPusher.rb http://example.org/void.ttl --assembler=/usr/lib/fuseki/tdb2_slave.ttl"
+    puts "        ruby GraphPusher.rb http://example.org/void.ttl --dataset=http://localhost:3030/dataset/data"
     puts ""
     puts "    NOTES"
-    puts "        See also config.rd for configuration settings"
+    puts "        See also config.rb for configuration settings"
 
     exit
 end
 
+ARGV.each do |a|
+    if a =~ /--assembler=/
+        $tdbAssemblerSlave = a.split(/--assembler=/)[1]
+    else
+        if a =~ /--dataset=/
+            $datasetURI = a.split(/--dataset=/)[1]
+        end
+    end
+end
+
 $voidurl = ARGV[0]
-$tdbAssemblerSlave = ARGV[1]
 
 $voidurlsafe = $voidurl.gsub(/[^a-zA-Z0-9\._-]/, '_')
 
@@ -36,18 +48,18 @@ $voiddir=$basedir + $ds + $voidurlsafe
 
 if !FileTest::directory?($voiddir)
     Dir::mkdir($voiddir)
-    puts "XXX: Made directory: " + $voiddir + $nl
+    puts "Made directory: " + $voiddir
 end
-puts "XXX: Directory " + $voiddir + " already exists." + $nl
+puts "Directory " + $voiddir + " already exists."
 
 $voidfile=$voiddir + $ds + "void.nt"
 puts $voidfile
 
-puts "XXX: Attempting to get " + $voidurl + " and copy over to " + $voidfile + $nl
-#XXX: Try to refactor this with indexTriples
+puts "Attempting to get " + $voidurl + " and copy over to " + $voidfile
+#Try to refactor this with indexTriples
 %x[rapper -g #{$voidurl} -o ntriples > #{$voidfile}]
 
-puts "XXX: Analyzing " + $voidfile + $nl
+puts "Analyzing " + $voidfile
 
 ddd = {}
 triples = indexTriples($voidfile)
@@ -78,7 +90,7 @@ if dataDumps.length > 0
                 #An else can go here to make sure there really is a name
             end
         else
-            puts "\nXXX: No sd:graph found. Falling back to #{$graphNameCase} URL for graph names."
+            puts "\nNo sd:graph found. Falling back to #{$graphNameCase} URL for graph names."
             case $graphNameCase;
                 when 'filename'
                     ddd[datadumpurl][['___filename___']] ||= []
@@ -92,7 +104,7 @@ if dataDumps.length > 0
 end
 
 # ddd[datadumpurl][graphurl]
-puts "\nXXX: datadumps to be imported (datadumpurl => graphurl):\n"
+puts "\ndatadumps to be imported (datadumpurl => graphurl):\n"
 p ddd
 
 if ddd.length > 0

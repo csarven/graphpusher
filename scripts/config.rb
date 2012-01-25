@@ -1,9 +1,10 @@
-# Config
+# GraphPusher https://github.com/csarven/GraphPusher
+#    Configuration for GraphPusher
+
 # Location to store the dumps
 $basedir='/var/www/test'
 
 # graphName to use in SPARQL Endpoint can be one of (from highest to lowest priority):
-# sd:name
 # dataset
 # dataDump
 # filename
@@ -16,9 +17,6 @@ $graphNameBase='http://example.org/graph/'
 
 #TODO: dataDumps are either local or remote (default)
 #$remoteDataDumps = true
-
-# Port number in which we are running the Fuseki server. If tdbAssembler is set, this is not used.
-$port='3030'
 
 # Operating system
 $os = 'linux'

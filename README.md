@@ -1,21 +1,21 @@
-# ReVoID
+# GraphPusher
 
 ## Overview
 
-ReVoID is a tool to rebuild an RDF store based on the information in a VoID file.
+GraphPusher is a tool to rebuild an RDF store based on the information in a VoID file.
 
-The ReVoID script takes a VoID URL as input from command-line, looks for the dataDump URL, gets the dataDump, and finally imports it into Fuseki's RDF store using one of the graph name methods.
+The GraphPusher tool takes a VoID URL as input from command-line, retrieves the VoID file, looks for the <code>void:dataDump</code> property values in the VoID description, HTTP GETs them, and finally imports them in to an RDF store using one of the graph name methods. The graph name method is defined as part of GraphPusher's configuration.
 
 This script is tested and is functional under Debian/Ubuntu. Feedback is appreciated from other OS users.
 
+See also: http://csarven.ca/graphpusher
 
 ## Requirements
 * [Ruby](http://ruby-lang.org/) (required gems: rubygems, net/http, net/https, uri, fileutils, filemagic)
 * tar, gzip, unzip, 7za, rar
 * [Raptor RDF Syntax Library](http://librdf.org/raptor/), and [rapper](http://librdf.org/raptor/rapper.html) RDF parser utility program
-* [Fuseki](http://openjena.org/wiki/Fuseki) SPARQL server
+* [Fuseki](http://openjena.org/wiki/Fuseki)'s SOH script (included in this package)
 * [TDB](http://openjena.org/wiki/TDB) RDF store (optional: where tdbAssembler setting is used)
-
 
 ## Configuration
 * basedir : Location to store the dumps
@@ -30,15 +30,14 @@ This script is tested and is functional under Debian/Ubuntu. Feedback is appreci
 ## Usage
 Importing dataDumps into RDF store via VoID file:
 
-    Usage: revoid.rb voidurl
-    Example: revoid.rb http://example.org/void.ttl
+    Usage: graphpusher.rb [VOIDURL] [OPTIONS]
+    Example: ruby graphpusher.rb http://example.org/void.ttl /usr/lib/fuseki/tdb2_slave.ttl
 
 
 ## SPARQL Graph names
 A graph name for the SPARQL Endpoint uses one of the following (from highest to lowest priority) by setting the graphNameCase:
 
-* sd:name (default)
-* dataset
+* dataset (default)
 * dataDump
 * filename
 
