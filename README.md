@@ -29,9 +29,9 @@ See also: http://csarven.ca/graphpusher
 ## Usage
 Importing dataDumps into RDF store via VoID file:
 
-    Usage: graphpusher.rb [VOIDURL] [OPTIONS]
-    Example: ruby graphpusher.rb http://example.org/void.ttl /usr/lib/fuseki/tdb2_slave.ttl
-
+    Usage: ruby graphpusher.rb VOIDURL [OPTIONS]
+    Examples: ruby GraphPusher.rb http://example.org/void.ttl --assembler=/usr/lib/fuseki/tdb2_slave.ttl
+              ruby GraphPusher.rb http://example.org/void.ttl --dataset=http://localhost:3030/dataset/data
 
 ## SPARQL Graph names
 A graph name for the SPARQL Endpoint uses one of the following (from highest to lowest priority) by setting the graphNameMethod:
@@ -40,10 +40,10 @@ A graph name for the SPARQL Endpoint uses one of the following (from highest to 
 * dataDump
 * filename
 
-By default, if sd:name in VoID is present, it will be used for SPARQL graph name, otherwise, dataset URI will be used. If dataDump or filename is set, they will be used instead of dataset.
-
-When filename is set for the graph name case, the base URL value (graphNameBase) for graph name is used in the SPARQL Endpoint.
+By default, if sd:name in VoID is present, it will be used for SPARQL graph name, otherwise, dataset URI will be used. If dataDump or filename is set, they will be used instead of dataset. When filename is set for the graph name case, the base URL value (graphNameBase) for graph name is used in the SPARQL Endpoint.
 
 
 ## ToDo
-Ability to use datadump files from the local network drive.
+* Ability to use datadump files from the local network drive
+* Retrieval of the VoID graph from a SPARQL endpoint
+
