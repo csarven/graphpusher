@@ -1,5 +1,9 @@
-# GraphPusher https://github.com/csarven/GraphPusher
+# GraphPusher
 #    Helper utils for GraphPusher
+
+#    Homepage: https://github.com/csarven/GraphPusher
+#    Author:   http://csarven.ca/#i
+#    License:  http://www.apache.org/licenses/LICENSE-2.0
 
 require 'config.rb'
 require 'rubygems'

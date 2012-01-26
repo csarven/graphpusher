@@ -1,6 +1,10 @@
-# GraphPusher https://github.com/csarven/GraphPusher
+# GraphPusher
 #    Retrieves and imports data in RDF format into a graph store
 #    based on the metadata in a VoID file
+
+#    Homepage: https://github.com/csarven/GraphPusher
+#    Author:   http://csarven.ca/#i
+#    License:  http://www.apache.org/licenses/LICENSE-2.0
 
 require 'utils.rb'
 

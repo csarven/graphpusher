@@ -1,5 +1,9 @@
-# GraphPusher https://github.com/csarven/GraphPusher
+# GraphPusher
 #    Configuration for GraphPusher
+
+#    Homepage: https://github.com/csarven/GraphPusher
+#    Author:   http://csarven.ca/#i
+#    License:  http://www.apache.org/licenses/LICENSE-2.0
 
 # Location to store the dumps
 $basedir='/var/www/test'
