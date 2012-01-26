@@ -23,8 +23,7 @@ See also: http://csarven.ca/graphpusher
 * tdbAssembler : TDB assembler file
 * graphNameMethod : Graph name method for SPARQL
 * graphNameBase : Base URL for graph names
-* port : Port number for Fuseki
-* os : Operating System name to determine new line types
+* os : Operating System name to determine new line types and directory separators
 
 
 ## Usage
