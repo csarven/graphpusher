@@ -8,8 +8,6 @@ The GraphPusher tool takes a VoID URL as input from command-line, retrieves the 
 
 This script is tested and is functional under Debian/Ubuntu. Feedback is appreciated from other OS users.
 
-See also: http://csarven.ca/graphpusher
-
 ## Requirements
 * [Ruby](http://ruby-lang.org/) (required gems: rubygems, net/http, net/https, uri, fileutils, filemagic)
 * tar, gzip, unzip, 7za, rar
