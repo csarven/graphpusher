@@ -2,11 +2,13 @@
 
 ## Overview
 
-GraphPusher is a tool to rebuild an RDF store based on the information in a VoID file.
+GraphPusher is a tool to automatically build an RDF store based on the information in a VoID file.
 
 The GraphPusher tool takes a VoID URL as input from command-line, retrieves the VoID file, looks for the <code>void:dataDump</code> property values in the VoID description, HTTP GETs them, and finally imports them in to an RDF store using one of the graph name methods. The graph name method is defined as part of GraphPusher's configuration.
 
-This script is tested and is functional under Debian/Ubuntu. Feedback is appreciated from other OS users.
+This script is tested and is functional under Debian/Ubuntu.
+
+See also: http://csarven.ca/graphpusher
 
 ## Requirements
 * [Ruby](http://ruby-lang.org/) (required gems: rubygems, net/http, net/https, uri, fileutils, filemagic)
