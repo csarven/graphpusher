@@ -46,4 +46,4 @@ By default, if sd:name in VoID is present, it will be used for SPARQL graph name
 ## ToDo
 * Ability to use datadump files from the local network drive
 * Retrieval of the VoID graph from a SPARQL endpoint
-
+* Create an N-Triples file per graph and load that into RDF store
