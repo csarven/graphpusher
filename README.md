@@ -8,7 +8,7 @@ The GraphPusher tool takes a VoID URL as input from command-line, retrieves the 
 
 This script is tested and is functional under Debian/Ubuntu.
 
-See also: http://csarven.ca/graphpusher
+See also: http://csarven.ca/statistical-linked-dataspaces#graphpusher
 
 ## Requirements
 * [Ruby](http://ruby-lang.org/) (required gems: rubygems, net/http, net/https, uri, fileutils, filemagic)
